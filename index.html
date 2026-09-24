@@ -237,11 +237,9 @@
   <script>
     const canvas = document.getElementById('tetris');
     const context = canvas.getContext('2d');
-    context.scale(24, 24);
 
     const nextCanvas = document.getElementById('next');
     const nextContext = nextCanvas.getContext('2d');
-    nextContext.scale(20, 20);
 
     const wrapper = document.getElementById('canvas-wrapper');
 
@@ -294,6 +292,14 @@
     let lastTime = 0;
     let gameOver = true;
     let requestId = null;
+
+    function resetScales() {
+      context.setTransform(1, 0, 0, 1, 0, 0);
+      context.scale(24, 24);
+
+      nextContext.setTransform(1, 0, 0, 1, 0, 0);
+      nextContext.scale(20, 20);
+    }
 
     function collide(arena, player) {
       const [m, o] = [player.matrix, player.pos];
@@ -437,9 +443,7 @@
     }
 
     function addFloatingText(text, x, y, color = '#fff') {
-      floatingTexts.push({
-        text, x, y, alpha: 1.0, color
-      });
+      floatingTexts.push({ text, x, y, alpha: 1.0, color });
     }
 
     function createParticles(x, y, color) {
@@ -702,6 +706,9 @@
 
     function startGame() {
       if (requestId) cancelAnimationFrame(requestId);
+      
+      resetScales();
+
       arena.forEach(row => row.fill(0));
       player.score = 0;
       player.lines = 0;
@@ -737,16 +744,11 @@
       }
     });
 
-    // Touch Controls setup with clean prevention of event duplication
+    // Touch controls
     function bindButton(id, callback) {
       const el = document.getElementById(id);
       let handled = false;
 
       el.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        handled = true;
-        callback();
-      }, { passive: false });
-
-      el.addEventListener('click', (e) => {
-    
+        handled = tr
