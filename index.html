@@ -744,11 +744,11 @@
       }
     });
 
-    // Touch controls
+    // Touch & Click controls for UI buttons
     function bindButton(id, callback) {
       const el = document.getElementById(id);
+      if (!el) return;
       let handled = false;
 
       el.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        handled = tr
+  
