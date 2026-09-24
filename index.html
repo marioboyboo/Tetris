@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Tetris Mobile</title>
+  <title>3D Animated Tetris</title>
   <style>
     * {
       box-sizing: border-box;
@@ -13,7 +13,7 @@
     }
 
     body {
-      background: #121212;
+      background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
       color: #fff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       margin: 0;
@@ -28,15 +28,16 @@
     }
 
     header {
-      padding: 8px 0;
+      padding: 6px 0;
       text-align: center;
     }
 
     h1 {
       margin: 0;
-      font-size: 1.4rem;
-      letter-spacing: 2px;
+      font-size: 1.6rem;
+      letter-spacing: 3px;
       color: #0dc2ff;
+      text-shadow: 0 0 10px rgba(13, 194, 255, 0.6), 0 0 20px rgba(13, 194, 255, 0.4);
     }
 
     .main-layout {
@@ -48,46 +49,55 @@
       max-width: 100%;
       flex: 1;
       padding: 0 10px;
+      perspective: 800px; /* 3D Perspective for board tilt */
     }
 
-    .canvas-container {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .canvas-wrapper {
+      transform-style: preserve-3d;
+      transform: rotateX(12deg) rotateY(-4deg);
+      transition: transform 0.3s ease;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+      border-radius: 8px;
+    }
+
+    .canvas-wrapper:hover {
+      transform: rotateX(0deg) rotateY(0deg);
     }
 
     canvas#tetris {
-      border: 2px solid #333;
-      background-color: #000;
-      border-radius: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      max-height: 60vh;
+      background: rgba(10, 10, 18, 0.9);
+      border: 2px solid #3a3a5c;
+      border-radius: 8px;
+      max-height: 55vh;
       width: auto;
       aspect-ratio: 1 / 2;
+      display: block;
     }
 
     .sidebar {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      min-width: 90px;
+      min-width: 95px;
       justify-content: center;
     }
 
     .info-box {
-      background: #1e1e1e;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(5px);
       padding: 8px;
-      border-radius: 6px;
+      border-radius: 8px;
       text-align: center;
-      border: 1px solid #2a2a2a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
 
     .info-box h2 {
       margin: 0 0 4px 0;
-      font-size: 0.75rem;
-      color: #888;
+      font-size: 0.7rem;
+      color: #a0a0c0;
       text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .info-box p {
@@ -98,30 +108,32 @@
     }
 
     canvas#next {
-      background: #000;
-      border-radius: 4px;
-      margin-top: 4px;
+      background: transparent;
+      margin-top: 2px;
       width: 70px;
       height: 70px;
     }
 
     #start-btn {
       padding: 10px 12px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: bold;
-      background: #0dc2ff;
-      color: #000;
+      background: linear-gradient(135deg, #0dc2ff, #0072ff);
+      color: #fff;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 12px rgba(13, 194, 255, 0.4);
+      transition: all 0.2s;
     }
 
     #start-btn:active {
-      opacity: 0.8;
+      transform: scale(0.95);
     }
 
-    /* Touch Controls */
+    /* Controls UI */
     .controls {
       display: flex;
       flex-direction: column;
@@ -141,10 +153,10 @@
 
     .btn {
       flex: 1;
-      height: 52px;
-      background: #252525;
-      border: 1px solid #3d3d3d;
-      border-radius: 8px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
       color: #fff;
       font-size: 1.2rem;
       font-weight: bold;
@@ -152,27 +164,25 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      touch-action: manipulation;
+      backdrop-filter: blur(4px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0,0,0,0.3);
+      transition: all 0.1s;
     }
 
     .btn:active {
-      background: #3d3d3d;
-      transform: scale(0.96);
-    }
-
-    .btn-wide {
-      flex: 2;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(2px);
     }
 
     .btn-drop {
-      background: #2e1a3a;
-      border-color: #5c3575;
+      background: rgba(216, 142, 255, 0.15);
+      border-color: rgba(216, 142, 255, 0.4);
       color: #d88eff;
     }
 
     .btn-rotate {
-      background: #1a2a3a;
-      border-color: #355c75;
+      background: rgba(142, 216, 255, 0.15);
+      border-color: rgba(142, 216, 255, 0.4);
       color: #8ed8ff;
     }
   </style>
@@ -180,11 +190,11 @@
 <body>
 
   <header>
-    <h1>TETRIS</h1>
+    <h1>3D TETRIS</h1>
   </header>
 
   <div class="main-layout">
-    <div class="canvas-container">
+    <div class="canvas-wrapper">
       <canvas id="tetris" width="240" height="480"></canvas>
     </div>
     <div class="sidebar">
@@ -227,66 +237,30 @@
 
     const COLORS = [
       null,
-      '#FF0D72', // T
-      '#0DC2FF', // I
-      '#0DFF72', // S
-      '#F538FF', // Z
-      '#FF8E0D', // L
-      '#FFE138', // J
-      '#3877FF'  // O
+      { main: '#FF0D72', top: '#FF59A1', side: '#B3004B' }, // T
+      { main: '#0DC2FF', top: '#66DCFF', side: '#0088B3' }, // I
+      { main: '#0DFF72', top: '#66FFA1', side: '#00B34B' }, // S
+      { main: '#F538FF', top: '#FA82FF', side: '#AC00B8' }, // Z
+      { main: '#FF8E0D', top: '#FFB766', side: '#B35E00' }, // L
+      { main: '#FFE138', top: '#FFEC82', side: '#B39B00' }, // J
+      { main: '#3877FF', top: '#82A8FF', side: '#0043B3' }  // O
     ];
 
+    let particles = [];
+
     function createPiece(type) {
-      if (type === 'I') {
-        return [
-          [0, 2, 0, 0],
-          [0, 2, 0, 0],
-          [0, 2, 0, 0],
-          [0, 2, 0, 0],
-        ];
-      } else if (type === 'L') {
-        return [
-          [0, 5, 0],
-          [0, 5, 0],
-          [0, 5, 5],
-        ];
-      } else if (type === 'J') {
-        return [
-          [0, 6, 0],
-          [0, 6, 0],
-          [6, 6, 0],
-        ];
-      } else if (type === 'O') {
-        return [
-          [7, 7],
-          [7, 7],
-        ];
-      } else if (type === 'Z') {
-        return [
-          [4, 4, 0],
-          [0, 4, 4],
-          [0, 0, 0],
-        ];
-      } else if (type === 'S') {
-        return [
-          [0, 3, 3],
-          [3, 3, 0],
-          [0, 0, 0],
-        ];
-      } else if (type === 'T') {
-        return [
-          [0, 1, 0],
-          [1, 1, 1],
-          [0, 0, 0],
-        ];
-      }
+      if (type === 'I') return [[0, 2, 0, 0],[0, 2, 0, 0],[0, 2, 0, 0],[0, 2, 0, 0]];
+      if (type === 'L') return [[0, 5, 0],[0, 5, 0],[0, 5, 5]];
+      if (type === 'J') return [[0, 6, 0],[0, 6, 0],[6, 6, 0]];
+      if (type === 'O') return [[7, 7],[7, 7]];
+      if (type === 'Z') return [[4, 4, 0],[0, 4, 4],[0, 0, 0]];
+      if (type === 'S') return [[0, 3, 3],[3, 3, 0],[0, 0, 0]];
+      if (type === 'T') return [[0, 1, 0],[1, 1, 1],[0, 0, 0]];
     }
 
     function createMatrix(w, h) {
       const matrix = [];
-      while (h--) {
-        matrix.push(new Array(w).fill(0));
-      }
+      while (h--) matrix.push(new Array(w).fill(0));
       return matrix;
     }
 
@@ -311,8 +285,7 @@
       const [m, o] = [player.matrix, player.pos];
       for (let y = 0; y < m.length; ++y) {
         for (let x = 0; x < m[y].length; ++x) {
-          if (m[y][x] !== 0 &&
-             (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+          if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
             return true;
           }
         }
@@ -409,12 +382,34 @@
       dropCounter = 0;
     }
 
+    function createParticles(x, y, color) {
+      for (let i = 0; i < 8; i++) {
+        particles.push({
+          x: x + 0.5,
+          y: y + 0.5,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          size: Math.random() * 0.2 + 0.1,
+          color: color.top,
+          alpha: 1,
+          life: 30
+        });
+      }
+    }
+
     function arenaSweep() {
       let rowCount = 1;
       outer: for (let y = arena.length - 1; y >= 0; --y) {
         for (let x = 0; x < arena[y].length; ++x) {
           if (arena[y][x] === 0) continue outer;
         }
+
+        // Spawn explosion particles for completed row
+        for (let x = 0; x < arena[y].length; ++x) {
+          const val = arena[y][x];
+          if (val) createParticles(x, y, COLORS[val]);
+        }
+
         const row = arena.splice(y, 1)[0].fill(0);
         arena.unshift(row);
         ++y;
@@ -428,31 +423,139 @@
       }
     }
 
+    // 3D Block Rendering Engine Function
+    function draw3DBlock(ctx, x, y, color) {
+      if (!color) return;
+
+      const size = 1;
+      const bevel = 0.15;
+
+      // Base Block Face
+      ctx.fillStyle = color.main;
+      ctx.fillRect(x + bevel, y + bevel, size - bevel * 2, size - bevel * 2);
+
+      // Top Bevel
+      ctx.fillStyle = color.top;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + size, y);
+      ctx.lineTo(x + size - bevel, y + bevel);
+      ctx.lineTo(x + bevel, y + bevel);
+      ctx.closePath();
+      ctx.fill();
+
+      // Left Bevel
+      ctx.fillStyle = color.top;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + bevel, y + bevel);
+      ctx.lineTo(x + bevel, y + size - bevel);
+      ctx.lineTo(x, y + size);
+      ctx.closePath();
+      ctx.fill();
+
+      // Bottom Bevel
+      ctx.fillStyle = color.side;
+      ctx.beginPath();
+      ctx.moveTo(x, y + size);
+      ctx.lineTo(x + bevel, y + size - bevel);
+      ctx.lineTo(x + size - bevel, y + size - bevel);
+      ctx.lineTo(x + size, y + size);
+      ctx.closePath();
+      ctx.fill();
+
+      // Right Bevel
+      ctx.fillStyle = color.side;
+      ctx.beginPath();
+      ctx.moveTo(x + size, y);
+      ctx.lineTo(x + size, y + size);
+      ctx.lineTo(x + size - bevel, y + size - bevel);
+      ctx.lineTo(x + size - bevel, y + bevel);
+      ctx.closePath();
+      ctx.fill();
+    }
+
     function drawMatrix(matrix, offset, ctx) {
       matrix.forEach((row, y) => {
         row.forEach((value, x) => {
           if (value !== 0) {
-            ctx.fillStyle = COLORS[value];
-            ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
-            ctx.lineWidth = 0.05;
-            ctx.strokeStyle = '#000';
-            ctx.strokeRect(x + offset.x, y + offset.y, 1, 1);
+            draw3DBlock(ctx, x + offset.x, y + offset.y, COLORS[value]);
           }
         });
       });
     }
 
+    // Render Drop Shadow / Ghost Piece
+    function drawGhostPiece() {
+      const ghost = {
+        pos: { x: player.pos.x, y: player.pos.y },
+        matrix: player.matrix
+      };
+
+      while (!collide(arena, ghost)) {
+        ghost.pos.y++;
+      }
+      ghost.pos.y--;
+
+      ghost.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            context.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            context.lineWidth = 0.05;
+            context.strokeRect(x + ghost.pos.x, y + ghost.pos.y, 1, 1);
+          }
+        });
+      });
+    }
+
+    function drawGrid() {
+      context.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      context.lineWidth = 0.02;
+      for (let x = 0; x < 10; x++) {
+        for (let y = 0; y < 20; y++) {
+          context.strokeRect(x, y, 1, 1);
+        }
+      }
+    }
+
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        p.alpha = p.life / 30;
+
+        context.save();
+        context.globalAlpha = Math.max(0, p.alpha);
+        context.fillStyle = p.color;
+        context.beginPath();
+        context.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+
     function draw() {
-      context.fillStyle = '#000';
+      context.fillStyle = '#0a0a12';
       context.fillRect(0, 0, canvas.width, canvas.height);
 
+      drawGrid();
       drawMatrix(arena, {x: 0, y: 0}, context);
-      drawMatrix(player.matrix, player.pos, context);
+      
+      if (player.matrix) {
+        drawGhostPiece();
+        drawMatrix(player.matrix, player.pos, context);
+      }
+
+      updateParticles();
     }
 
     function drawNext() {
-      nextContext.fillStyle = '#000';
-      nextContext.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+      nextContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+      if (!player.nextMatrix) return;
 
       const offset = {
         x: (4 - player.nextMatrix[0].length) / 2,
@@ -488,6 +591,7 @@
       player.lines = 0;
       player.level = 1;
       player.nextMatrix = null;
+      particles = [];
       dropInterval = 1000;
       gameOver = false;
       updateScore();
@@ -495,7 +599,7 @@
       update();
     }
 
-    // Keyboard controls
+    // Keyboard bindings
     document.addEventListener('keydown', event => {
       if (gameOver) return;
       if (event.keyCode === 37) playerMove(-1);
@@ -508,17 +612,14 @@
       }
     });
 
-    // Touch Controls setup
+    // Mobile touch attachments
     function attachTouch(id, action) {
       const el = document.getElementById(id);
-      let timer = null;
-
       const start = (e) => {
         e.preventDefault();
         if (gameOver) return;
         action();
       };
-
       el.addEventListener('touchstart', start, { passive: false });
       el.addEventListener('click', start);
     }
