@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>3D Animated Tetris</title>
+  <title>3D Animated Tetris - Enhanced</title>
   <style>
     * {
       box-sizing: border-box;
@@ -13,7 +13,7 @@
     }
 
     body {
-      background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+      background: radial-gradient(circle at center, #1a1e36 0%, #080910 100%);
       color: #fff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       margin: 0;
@@ -37,7 +37,7 @@
       font-size: 1.6rem;
       letter-spacing: 3px;
       color: #0dc2ff;
-      text-shadow: 0 0 10px rgba(13, 194, 255, 0.6), 0 0 20px rgba(13, 194, 255, 0.4);
+      text-shadow: 0 0 12px rgba(13, 194, 255, 0.8), 0 0 25px rgba(13, 194, 255, 0.5);
     }
 
     .main-layout {
@@ -49,25 +49,35 @@
       max-width: 100%;
       flex: 1;
       padding: 0 10px;
-      perspective: 800px; /* 3D Perspective for board tilt */
+      perspective: 900px;
     }
 
     .canvas-wrapper {
       transform-style: preserve-3d;
-      transform: rotateX(12deg) rotateY(-4deg);
-      transition: transform 0.3s ease;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.8);
-      border-radius: 8px;
+      transform: rotateX(14deg) rotateY(-3deg);
+      transition: transform 0.1s ease-out;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.85);
+      border-radius: 10px;
+      position: relative;
     }
 
-    .canvas-wrapper:hover {
-      transform: rotateX(0deg) rotateY(0deg);
+    /* Screen shake dynamic class */
+    .shake {
+      animation: cameraShake 0.18s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes cameraShake {
+      0% { transform: rotateX(14deg) rotateY(-3deg) translate3d(0, 0, 0); }
+      25% { transform: rotateX(18deg) rotateY(-1deg) translate3d(-3px, 5px, 10px); }
+      50% { transform: rotateX(11deg) rotateY(-5deg) translate3d(3px, -4px, -5px); }
+      75% { transform: rotateX(15deg) rotateY(-2deg) translate3d(-2px, 2px, 5px); }
+      100% { transform: rotateX(14deg) rotateY(-3deg) translate3d(0, 0, 0); }
     }
 
     canvas#tetris {
-      background: rgba(10, 10, 18, 0.9);
-      border: 2px solid #3a3a5c;
-      border-radius: 8px;
+      background: rgba(12, 12, 22, 0.92);
+      border: 2px solid #3d426b;
+      border-radius: 10px;
       max-height: 55vh;
       width: auto;
       aspect-ratio: 1 / 2;
@@ -84,18 +94,18 @@
 
     .info-box {
       background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(8px);
       padding: 8px;
       border-radius: 8px;
       text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
 
     .info-box h2 {
       margin: 0 0 4px 0;
       font-size: 0.7rem;
-      color: #a0a0c0;
+      color: #9397c0;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
@@ -118,14 +128,14 @@
       padding: 10px 12px;
       font-size: 0.85rem;
       font-weight: bold;
-      background: linear-gradient(135deg, #0dc2ff, #0072ff);
+      background: linear-gradient(135deg, #0dc2ff, #0055ff);
       color: #fff;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       text-transform: uppercase;
       letter-spacing: 1px;
-      box-shadow: 0 4px 12px rgba(13, 194, 255, 0.4);
+      box-shadow: 0 4px 15px rgba(13, 194, 255, 0.5);
       transition: all 0.2s;
     }
 
@@ -133,7 +143,6 @@
       transform: scale(0.95);
     }
 
-    /* Controls UI */
     .controls {
       display: flex;
       flex-direction: column;
@@ -175,14 +184,15 @@
     }
 
     .btn-drop {
-      background: rgba(216, 142, 255, 0.15);
-      border-color: rgba(216, 142, 255, 0.4);
-      color: #d88eff;
+      background: rgba(216, 142, 255, 0.2);
+      border-color: rgba(216, 142, 255, 0.5);
+      color: #e2a6ff;
+      box-shadow: 0 0 10px rgba(216, 142, 255, 0.3);
     }
 
     .btn-rotate {
-      background: rgba(142, 216, 255, 0.15);
-      border-color: rgba(142, 216, 255, 0.4);
+      background: rgba(142, 216, 255, 0.2);
+      border-color: rgba(142, 216, 255, 0.5);
       color: #8ed8ff;
     }
   </style>
@@ -194,7 +204,7 @@
   </header>
 
   <div class="main-layout">
-    <div class="canvas-wrapper">
+    <div class="canvas-wrapper" id="canvas-wrapper">
       <canvas id="tetris" width="240" height="480"></canvas>
     </div>
     <div class="sidebar">
@@ -235,18 +245,25 @@
     const nextContext = nextCanvas.getContext('2d');
     nextContext.scale(20, 20);
 
+    const wrapper = document.getElementById('canvas-wrapper');
+
     const COLORS = [
       null,
-      { main: '#FF0D72', top: '#FF59A1', side: '#B3004B' }, // T
-      { main: '#0DC2FF', top: '#66DCFF', side: '#0088B3' }, // I
-      { main: '#0DFF72', top: '#66FFA1', side: '#00B34B' }, // S
-      { main: '#F538FF', top: '#FA82FF', side: '#AC00B8' }, // Z
-      { main: '#FF8E0D', top: '#FFB766', side: '#B35E00' }, // L
-      { main: '#FFE138', top: '#FFEC82', side: '#B39B00' }, // J
-      { main: '#3877FF', top: '#82A8FF', side: '#0043B3' }  // O
+      { main: '#FF0D72', top: '#FF59A1', side: '#B3004B', glow: 'rgba(255,13,114,0.6)' }, // T
+      { main: '#0DC2FF', top: '#66DCFF', side: '#0088B3', glow: 'rgba(13,194,255,0.6)' }, // I
+      { main: '#0DFF72', top: '#66FFA1', side: '#00B34B', glow: 'rgba(13,255,114,0.6)' }, // S
+      { main: '#F538FF', top: '#FA82FF', side: '#AC00B8', glow: 'rgba(245,56,255,0.6)' }, // Z
+      { main: '#FF8E0D', top: '#FFB766', side: '#B35E00', glow: 'rgba(255,142,13,0.6)' }, // L
+      { main: '#FFE138', top: '#FFEC82', side: '#B39B00', glow: 'rgba(255,225,56,0.6)' }, // J
+      { main: '#3877FF', top: '#82A8FF', side: '#0043B3', glow: 'rgba(56,119,255,0.6)' }  // O
     ];
 
+    // Animation Effect Storage Arrays
     let particles = [];
+    let hardDropBeams = [];
+    let shockwaves = [];
+    let lineFlashes = [];
+    let floatingTexts = [];
 
     function createPiece(type) {
       if (type === 'I') return [[0, 2, 0, 0],[0, 2, 0, 0],[0, 2, 0, 0],[0, 2, 0, 0]];
@@ -370,11 +387,54 @@
       dropCounter = 0;
     }
 
+    // ENHANCED INSTANT HARD DROP ANIMATION SYSTEM
     function playerHardDrop() {
+      const startY = player.pos.y;
+      
       while (!collide(arena, player)) {
         player.pos.y++;
       }
       player.pos.y--;
+      const endY = player.pos.y;
+      const dropDistance = endY - startY;
+
+      // 1. Vertical Laser Beams for each column of the piece
+      player.matrix.forEach((row, y) => {
+        row.forEach((val, x) => {
+          if (val !== 0) {
+            const colX = player.pos.x + x;
+            hardDropBeams.push({
+              x: colX,
+              startY: startY + y,
+              endY: endY + y,
+              color: COLORS[val].top,
+              alpha: 1.0,
+              width: 1
+            });
+
+            // 2. Impact Shockwave Ripples at bottom landing points
+            shockwaves.push({
+              x: colX + 0.5,
+              y: endY + y + 1,
+              radius: 0.1,
+              maxRadius: 1.8,
+              color: COLORS[val].top,
+              alpha: 1.0
+            });
+          }
+        });
+      });
+
+      // 3. Screen Shake Camera Trigger
+      if (dropDistance > 2) {
+        wrapper.classList.remove('shake');
+        void wrapper.offsetWidth; // Force CSS reflow
+        wrapper.classList.add('shake');
+      }
+
+      // 4. Score Popup
+      addFloatingText(`+${dropDistance * 2}`, player.pos.x + 1, player.pos.y, '#e2a6ff');
+
       merge(arena, player);
       playerReset();
       arenaSweep();
@@ -382,29 +442,42 @@
       dropCounter = 0;
     }
 
+    function addFloatingText(text, x, y, color = '#fff') {
+      floatingTexts.push({
+        text,
+        x,
+        y,
+        alpha: 1.0,
+        color
+      });
+    }
+
     function createParticles(x, y, color) {
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 12; i++) {
         particles.push({
           x: x + 0.5,
           y: y + 0.5,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
-          size: Math.random() * 0.2 + 0.1,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.8) * 0.4,
+          size: Math.random() * 0.25 + 0.1,
           color: color.top,
           alpha: 1,
-          life: 30
+          life: 25 + Math.random() * 15
         });
       }
     }
 
     function arenaSweep() {
-      let rowCount = 1;
+      let rowCount = 0;
       outer: for (let y = arena.length - 1; y >= 0; --y) {
         for (let x = 0; x < arena[y].length; ++x) {
           if (arena[y][x] === 0) continue outer;
         }
 
-        // Spawn explosion particles for completed row
+        // Line Flash animation trigger
+        lineFlashes.push({ y: y, alpha: 1.0 });
+
+        // Particle Explosions
         for (let x = 0; x < arena[y].length; ++x) {
           const val = arena[y][x];
           if (val) createParticles(x, y, COLORS[val]);
@@ -413,28 +486,37 @@
         const row = arena.splice(y, 1)[0].fill(0);
         arena.unshift(row);
         ++y;
+        rowCount++;
+      }
 
-        player.score += rowCount * 100;
-        player.lines += 1;
-        rowCount *= 2;
+      if (rowCount > 0) {
+        const points = [0, 100, 300, 500, 800][rowCount] || rowCount * 200;
+        player.score += points;
+        player.lines += rowCount;
+        
+        // Floating Score Alert
+        addFloatingText(`+${points}`, 4, 10, '#0dc2ff');
 
         player.level = Math.floor(player.lines / 10) + 1;
         dropInterval = Math.max(100, 1000 - (player.level - 1) * 100);
       }
     }
 
-    // 3D Block Rendering Engine Function
-    function draw3DBlock(ctx, x, y, color) {
+    // 3D Block Rendering
+    function draw3DBlock(ctx, x, y, color, opacity = 1) {
       if (!color) return;
 
       const size = 1;
       const bevel = 0.15;
 
-      // Base Block Face
+      ctx.save();
+      ctx.globalAlpha = opacity;
+
+      // Base Face
       ctx.fillStyle = color.main;
       ctx.fillRect(x + bevel, y + bevel, size - bevel * 2, size - bevel * 2);
 
-      // Top Bevel
+      // Top Highlight
       ctx.fillStyle = color.top;
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -444,7 +526,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // Left Bevel
+      // Left Highlight
       ctx.fillStyle = color.top;
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -454,7 +536,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // Bottom Bevel
+      // Bottom Shadow
       ctx.fillStyle = color.side;
       ctx.beginPath();
       ctx.moveTo(x, y + size);
@@ -464,7 +546,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // Right Bevel
+      // Right Shadow
       ctx.fillStyle = color.side;
       ctx.beginPath();
       ctx.moveTo(x + size, y);
@@ -473,6 +555,8 @@
       ctx.lineTo(x + size - bevel, y + bevel);
       ctx.closePath();
       ctx.fill();
+
+      ctx.restore();
     }
 
     function drawMatrix(matrix, offset, ctx) {
@@ -485,7 +569,6 @@
       });
     }
 
-    // Render Drop Shadow / Ghost Piece
     function drawGhostPiece() {
       const ghost = {
         pos: { x: player.pos.x, y: player.pos.y },
@@ -500,7 +583,7 @@
       ghost.matrix.forEach((row, y) => {
         row.forEach((value, x) => {
           if (value !== 0) {
-            context.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            context.strokeStyle = 'rgba(255, 255, 255, 0.3)';
             context.lineWidth = 0.05;
             context.strokeRect(x + ghost.pos.x, y + ghost.pos.y, 1, 1);
           }
@@ -518,13 +601,66 @@
       }
     }
 
-    function updateParticles() {
+    // ANIMATIONS RENDERER LOOP
+    function renderAnimations() {
+      // 1. Instant Drop Beams
+      for (let i = hardDropBeams.length - 1; i >= 0; i--) {
+        const b = hardDropBeams[i];
+        context.save();
+        context.globalAlpha = b.alpha;
+        
+        const grad = context.createLinearGradient(b.x, b.startY, b.x, b.endY);
+        grad.addColorStop(0, 'rgba(255,255,255,0)');
+        grad.addColorStop(0.5, b.color);
+        grad.addColorStop(1, '#ffffff');
+
+        context.fillStyle = grad;
+        context.fillRect(b.x + 0.1, b.startY, 0.8, b.endY - b.startY + 1);
+        context.restore();
+
+        b.alpha -= 0.1;
+        if (b.alpha <= 0) hardDropBeams.splice(i, 1);
+      }
+
+      // 2. Shockwave Ripples
+      for (let i = shockwaves.length - 1; i >= 0; i--) {
+        const s = shockwaves[i];
+        context.save();
+        context.globalAlpha = s.alpha;
+        context.strokeStyle = s.color;
+        context.lineWidth = 0.08;
+
+        context.beginPath();
+        context.ellipse(s.x, s.y, s.radius, s.radius * 0.4, 0, 0, Math.PI * 2);
+        context.stroke();
+        context.restore();
+
+        s.radius += 0.15;
+        s.alpha -= 0.08;
+        if (s.alpha <= 0) shockwaves.splice(i, 1);
+      }
+
+      // 3. Line Clear Flashes
+      for (let i = lineFlashes.length - 1; i >= 0; i--) {
+        const f = lineFlashes[i];
+        context.save();
+        context.globalAlpha = f.alpha;
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, f.y, 10, 1);
+        context.restore();
+
+        f.alpha -= 0.15;
+        if (f.alpha <= 0) lineFlashes.splice(i, 1);
+      }
+
+      // 4. Particles Burst
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx;
         p.y += p.vy;
+        p.vy += 0.015; // Gravity
         p.life--;
-        p.alpha = p.life / 30;
+        p.alpha = p.life / 35;
 
         context.save();
         context.globalAlpha = Math.max(0, p.alpha);
@@ -536,10 +672,26 @@
 
         if (p.life <= 0) particles.splice(i, 1);
       }
+
+      // 5. Floating Score Texts
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const t = floatingTexts[i];
+        t.y -= 0.03;
+        t.alpha -= 0.03;
+
+        context.save();
+        context.globalAlpha = Math.max(0, t.alpha);
+        context.fillStyle = t.color;
+        context.font = 'bold 0.9px sans-serif';
+        context.fillText(t.text, t.x, t.y);
+        context.restore();
+
+        if (t.alpha <= 0) floatingTexts.splice(i, 1);
+      }
     }
 
     function draw() {
-      context.fillStyle = '#0a0a12';
+      context.fillStyle = '#0c0c16';
       context.fillRect(0, 0, canvas.width, canvas.height);
 
       drawGrid();
@@ -550,7 +702,7 @@
         drawMatrix(player.matrix, player.pos, context);
       }
 
-      updateParticles();
+      renderAnimations();
     }
 
     function drawNext() {
@@ -592,43 +744,4 @@
       player.level = 1;
       player.nextMatrix = null;
       particles = [];
-      dropInterval = 1000;
-      gameOver = false;
-      updateScore();
-      playerReset();
-      update();
-    }
-
-    // Keyboard bindings
-    document.addEventListener('keydown', event => {
-      if (gameOver) return;
-      if (event.keyCode === 37) playerMove(-1);
-      else if (event.keyCode === 39) playerMove(1);
-      else if (event.keyCode === 40) playerDrop();
-      else if (event.keyCode === 38) playerRotate(1);
-      else if (event.keyCode === 32) {
-        event.preventDefault();
-        playerHardDrop();
-      }
-    });
-
-    // Mobile touch attachments
-    function attachTouch(id, action) {
-      const el = document.getElementById(id);
-      const start = (e) => {
-        e.preventDefault();
-        if (gameOver) return;
-        action();
-      };
-      el.addEventListener('touchstart', start, { passive: false });
-      el.addEventListener('click', start);
-    }
-
-    attachTouch('btn-left', () => playerMove(-1));
-    attachTouch('btn-right', () => playerMove(1));
-    attachTouch('btn-down', () => playerDrop());
-    attachTouch('btn-rotate', () => playerRotate(1));
-    attachTouch('btn-hard', () => playerHardDrop());
-  </script>
-</body>
-</html>
+  
