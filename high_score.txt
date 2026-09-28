@@ -1,1 +1,23 @@
-1
+let highScore = 0;
+
+// 1. Automatically load saved high score from browser memory on startup
+function loadHighScore() {
+  const savedScore = localStorage.getItem('tetris_high_score');
+  if (savedScore !== null) {
+    highScore = parseInt(savedScore, 10);
+  }
+  updateHighScoreUI();
+}
+
+function updateHighScoreUI() {
+  document.getElementById('high-score').innerText = highScore;
+}
+
+// 2. Save new high score whenever a player sets a record
+function checkAndSaveHighScore(newScore) {
+  if (newScore > highScore) {
+    highScore = newScore;
+    localStorage.setItem('tetris_high_score', highScore);
+    updateHighScoreUI();
+  }
+}
