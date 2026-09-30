@@ -28,6 +28,128 @@
       position: relative;
     }
 
+    /* Top Left Download Button */
+    .download-btn-top {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 100;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #0dc2ff, #0055ff);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 12px rgba(13, 194, 255, 0.4);
+      transition: transform 0.1s ease;
+    }
+
+    .download-btn-top:active {
+      transform: scale(0.95);
+    }
+
+    /* Modal Overlay & Card */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(5px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-card {
+      background: #14172b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 24px;
+      width: 320px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+
+    .modal-card h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 1.2rem;
+      color: #0dc2ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: transparent;
+      border: none;
+      color: #8ed8ff;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .dl-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dl-option-btn, .dl-sub-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .dl-option-btn:hover, .dl-sub-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .dl-option-btn:active, .dl-sub-btn:active {
+      transform: scale(0.98);
+    }
+
+    .linux-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    .linux-label {
+      font-size: 0.85rem;
+      color: #9397c0;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .linux-sub-row {
+      display: flex;
+      gap: 8px;
+    }
+
     header {
       padding: 8px 0;
       text-align: center;
@@ -198,65 +320,58 @@
     #game-over-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
+      inset: 0;
+      background: rgba(0,0,0,0.75);
       z-index: 9999;
-      pointer-events: auto;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .game-over-box {
+      text-align: center;
+      padding: 30px;
+    }
+
+    .game-over-title {
+      font-size: 4rem;
+      font-weight: bold;
+      color: #ff0d72;
+      margin-bottom: 20px;
+    }
+
+    .retry-btn {
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
       cursor: pointer;
+      border: none;
+      border-radius: 10px;
     }
 
-    .video-popup {
-      position: absolute;
-      border-radius: 8px;
-      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
-      object-fit: cover;
-      pointer-events: none;
-    }
-
-    .video-fullscreen {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 10000;
-    }
-  
-    #game-over-overlay{
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.75);
-      z-index:9999;
-      align-items:center;
-      justify-content:center;
-    }
-    .game-over-box{
-      text-align:center;
-      padding:30px;
-    }
-    .game-over-title{
-      font-size:4rem;
-      font-weight:bold;
-      color:#ff0d72;
-      margin-bottom:20px;
-    }
-    .retry-btn{
-      padding:15px 30px;
-      font-size:1.2rem;
-      font-weight:bold;
-      cursor:pointer;
-      border:none;
-      border-radius:10px;
-    }
-
-</style>
+  </style>
 </head>
 <body>
+
+  <button class="download-btn-top" id="download-trigger">Download</button>
+
+  <div class="modal-overlay" id="download-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="modal-close">&times;</button>
+      <h2>Download App</h2>
+      <div class="dl-options">
+        <a href="tetris.apk" download="tetris.apk" class="dl-option-btn">APK (for Android)</a>
+        <a href="tetris.exe" download="tetris.exe" class="dl-option-btn">EXE (for Windows)</a>
+        <a href="tetris.app" download="tetris.app" class="dl-option-btn">APP (for Mac)</a>
+        <div class="linux-group">
+          <div class="linux-label">Linux Options</div>
+          <div class="linux-sub-row">
+            <a href="tetris.deb" download="tetris.deb" class="dl-sub-btn">.deb</a>
+            <a href="tetris.rpm" download="tetris.rpm" class="dl-sub-btn">.rpm</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <header>
     <h1>3D TETRIS</h1>
@@ -302,6 +417,24 @@
   <div id="game-over-overlay"></div>
 
   <script>
+    const downloadTrigger = document.getElementById('download-trigger');
+    const downloadModal = document.getElementById('download-modal');
+    const modalClose = document.getElementById('modal-close');
+
+    downloadTrigger.addEventListener('click', () => {
+      downloadModal.style.display = 'flex';
+    });
+
+    modalClose.addEventListener('click', () => {
+      downloadModal.style.display = 'none';
+    });
+
+    downloadModal.addEventListener('click', (e) => {
+      if (e.target === downloadModal) {
+        downloadModal.style.display = 'none';
+      }
+    });
+
     const canvas = document.getElementById('tetris');
     const context = canvas.getContext('2d');
 
@@ -790,10 +923,10 @@
 
     function draw() {
       context.save();
-      context.setTransform(1, 0, 0, 1, 0, 0); // Reset scale/transforms before clearing
+      context.setTransform(1, 0, 0, 1, 0, 0);
       context.fillStyle = '#0c0c16';
       context.fillRect(0, 0, canvas.width, canvas.height);
-      context.scale(24, 24); // Re-apply grid scaling cleanly
+      context.scale(24, 24);
 
       drawGrid();
       drawMatrix(arena, {x: 0, y: 0}, context);
