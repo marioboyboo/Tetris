@@ -361,6 +361,7 @@
 
     function collide(arena, player) {
       const [m, o] = [player.matrix, player.pos];
+      if (!m) return false;
       for (let y = 0; y < m.length; ++y) {
         for (let x = 0; x < m[y].length; ++x) {
           if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
@@ -372,6 +373,7 @@
     }
 
     function merge(arena, player) {
+      if (!player.matrix) return;
       player.matrix.forEach((row, y) => {
         row.forEach((value, x) => {
           if (value !== 0) {
@@ -430,7 +432,7 @@
 
       checkAndSaveHighScore(player.score);
       player.matrix = null;
-      draw();
+      draw(); // Render cleanly one final time without active pieces
 
       overlay.innerHTML = '';
       overlay.style.display = 'block';
@@ -676,7 +678,7 @@
     }
 
     function drawGhostPiece() {
-      if (!player.matrix) return;
+      if (gameOver || !player.matrix) return;
       const ghost = {
         pos: { x: player.pos.x, y: player.pos.y },
         matrix: player.matrix
@@ -789,7 +791,7 @@
       context.setTransform(1, 0, 0, 1, 0, 0); // Reset scale/transforms before clearing
       context.fillStyle = '#0c0c16';
       context.fillRect(0, 0, canvas.width, canvas.height);
-      context.scale(24, 24); // Re-apply grid scaling safely
+      context.scale(24, 24); // Re-apply grid scaling cleanly
 
       drawGrid();
       drawMatrix(arena, {x: 0, y: 0}, context);
