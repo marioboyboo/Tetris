@@ -579,6 +579,8 @@
     let shockwaves = [];
     let lineFlashes = [];
     let floatingTexts = [];
+    let dropTrails = [];
+    let speedLines = [];
 
     function createPiece(type) {
       if (type === 'I') return [[0, 0, 0, 0],[2, 2, 2, 2],[0, 0, 0, 0],[0, 0, 0, 0]];
@@ -792,11 +794,40 @@
       const endY = player.pos.y;
       const dropDistance = endY - startY;
 
+      // Create motion blur ghosts and drop trails
+      const totalSteps = 6;
       player.matrix.forEach((row, y) => {
         row.forEach((val, x) => {
           if (val !== 0) {
             const colX = player.pos.x + x;
             
+            // Motion blur trail along the fall path
+            for (let i = 0; i < totalSteps; i++) {
+              const progress = i / totalSteps;
+              const trailY = startY + y + (dropDistance * progress);
+              dropTrails.push({
+                x: colX,
+                y: trailY,
+                val: val,
+                alpha: 0.5 * (1 - progress),
+                scaleY: 1 + (dropDistance * 0.15)
+              });
+            }
+
+            // Speed lines originating from drop path
+            for (let i = 0; i < 2; i++) {
+              speedLines.push({
+                x: colX + Math.random(),
+                startY: startY + y,
+                endY: endY + y + 1,
+                vy: Math.random() * 0.4 + 0.3,
+                length: Math.random() * 3 + 2,
+                color: COLORS[val].top,
+                alpha: 0.9,
+                width: Math.random() * 0.08 + 0.03
+              });
+            }
+
             hardDropBeams.push({
               x: colX,
               startY: startY + y,
@@ -1009,6 +1040,19 @@
         if (b.alpha <= 0) hardDropBeams.splice(i, 1);
       }
 
+      for (let i = dropTrails.length - 1; i >= 0; i--) {
+        const t = dropTrails[i];
+        t.alpha -= 0.08;
+        if (t.alpha <= 0) dropTrails.splice(i, 1);
+      }
+
+      for (let i = speedLines.length - 1; i >= 0; i--) {
+        const sl = speedLines[i];
+        sl.alpha -= 0.08;
+        sl.startY += sl.vy;
+        if (sl.alpha <= 0) speedLines.splice(i, 1);
+      }
+
       for (let i = shockwaves.length - 1; i >= 0; i--) {
         const s = shockwaves[i];
         s.radius += 0.2;
@@ -1040,6 +1084,29 @@
     }
 
     function drawEffects() {
+      // Motion blur trails
+      dropTrails.forEach(t => {
+        context.save();
+        context.globalAlpha = t.alpha;
+        context.translate(t.x, t.y);
+        context.scale(1, t.scaleY);
+        drawBlock(context, 0, 0, t.val, t.alpha);
+        context.restore();
+      });
+
+      // Dynamic Speed lines
+      speedLines.forEach(sl => {
+        context.save();
+        context.globalAlpha = sl.alpha;
+        context.strokeStyle = sl.color;
+        context.lineWidth = sl.width;
+        context.beginPath();
+        context.moveTo(sl.x, sl.startY);
+        context.lineTo(sl.x, sl.startY + sl.length);
+        context.stroke();
+        context.restore();
+      });
+
       hardDropBeams.forEach(b => {
         context.save();
         context.globalAlpha = b.alpha * 0.6;
@@ -1141,7 +1208,7 @@
       updateEffects();
       draw();
 
-      if (!gameOver || particles.length > 0 || floatingTexts.length > 0) {
+      if (!gameOver || particles.length > 0 || floatingTexts.length > 0 || dropTrails.length > 0 || speedLines.length > 0) {
         requestId = requestAnimationFrame(update);
       }
     }
