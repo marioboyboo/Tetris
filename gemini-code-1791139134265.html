@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Drop & Rotate Animation</title>
+  <style>
+    :root {
+      --drop-rotate-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    /* Keyframe definition for Drop & Rotate */
+    @keyframes dropRotate {
+      0% {
+        opacity: 0;
+        transform: translateY(-250px) rotate(-180deg) scale(0.6);
+      }
+      65% {
+        opacity: 1;
+        /* Overshoot for impact feel */
+        transform: translateY(12px) rotate(10deg) scale(1.05);
+      }
+      82% {
+        transform: translateY(-4px) rotate(-3deg) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg) scale(1);
+      }
+    }
+
+    /* Class applied to animate */
+    .drop-rotate-in {
+      animation: dropRotate 0.85s var(--drop-rotate-ease) forwards;
+      will-change: transform, opacity;
+    }
+
+    /* Container Card Styling */
+    .animated-card {
+      background-color: var(--card-bg);
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    .icon-wrapper {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #818cf8, #6366f1);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+    }
+
+    .icon-wrapper svg {
+      width: 32px;
+      height: 32px;
+      fill: #ffffff;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.025em;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    /* Replay Button */
+    .btn {
+      background-color: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="card" class="animated-card drop-rotate-in">
+    <div class="icon-wrapper">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm1-13h-2v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+      </svg>
+    </div>
+    <h1>Drop & Rotate</h1>
+    <p>This card spins and drops down from above with an elastic rebound when it hits its resting point.</p>
+    <button class="btn" onclick="replayAnimation()">Replay Animation</button>
+  </div>
+
+  <script>
+    function replayAnimation() {
+      const card = document.getElementById('card');
+      // Remove class to reset
+      card.classList.remove('drop-rotate-in');
+      
+      // Force reflow/repaint to restart CSS animation
+      void card.offsetWidth;
+      
+      // Re-add class
+      card.classList.add('drop-rotate-in');
+    }
+  </script>
+
+</body>
+</html>
